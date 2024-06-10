@@ -1,0 +1,28 @@
+{
+    "noticias": [
+      {
+        "titulo": "Nuevo trailer de la película 'Inception 2' lanzado",
+        "autor":"guy, family",
+        "url": "https://example.com/noticia1",
+        "veracidad": 4,
+        "relevancia": 3,
+        "comunidad": "Cine"
+      },
+      {
+        "titulo": "Taylor Swift anuncia su nuevo álbum 'Evermore'",
+        "autor":"guy, family",
+        "url": "https://example.com/noticia2",
+        "veracidad": 4,
+        "relevancia": 4,
+        "comunidad": "Música"
+      },
+      {
+        "titulo": "Nuevo libro de Stephen King 'El Visitante' llega a las librerías",
+        "autor":"guy, family",
+        "url": "https://example.com/noticia3",
+        "veracidad": 4,
+        "relevancia": 3,
+        "comunidad": "Literatura"
+      }
+    ]
+  }

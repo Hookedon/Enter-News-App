@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"        rel="stylesheet">
+        <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css"                          rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"     rel="stylesheet">
+        
+        <link href="css/estilo.css" rel="stylesheet">
+        <title>Enter News</title>
+    </head>
+    <body>
+        <div id="app">
+            <nav class="navbar navbar-expand-lg bg-body-tertiary d-flex display-block">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="#">Enter News</a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" @click="toggleNav">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" :class="{ 'show': isNavOpen }" id="navbarNav">
+                        <ul class="navbar-nav me-auto">
+                            <div v-if="sesion >= 1">
+                                <li class="nav-item">
+                                    <a class="nav-link" @click="changePage('intereses')" :class="{ active: currentPage === 'intereses' }" href="#" >Tus Intereses</a>
+                                </li>
+                            </div>
+                            <li class="nav-item">
+                                <a class="nav-link" @click="changePage('buscar')" :class="{ active: currentPage === 'buscar' }" href="#" >Buscar Comunidades</a>
+                            </li>
+                            <div v-if="sesion >= 1">
+                                <li class="nav-item">
+                                    <a class="nav-link" @click="changePage('crear')" :class="{ active: currentPage === 'crear' }" href="#" >Crear</a>
+                                </li>
+                            </div>
+                            <div v-if="sesion == 2">
+                                
+                                <li class="nav-item">
+                                    <button class="nav-link" @click="changePage('administracion')" :class="{ active: currentPage === 'administracion' }">Administración</button>
+                                </li>
+                                
+                            </div>
+                        </ul>
+                        
+                        <div v-if="sesion == 0">
+                            <ul class="navbar-nav">
+                                <li class="nav-item">
+                                    <button class="btn btn-primary m-1" @click="changePage('login')" :class="{ active: currentPage === 'login' }">Inicia Sesion</button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="btn btn-primary m-1" @click="changePage('registro')" :class="{ active: currentPage === 'registro' }">Registrate</button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div v-else-if="sesion >= 1">
+                            <ul class="navbar-nav">
+                                <li class="nav-item">
+                                    <button class="btn btn-primary m-1" @click="changePage('cuenta')" :class="{ active: currentPage === 'cuenta' }">Tu Cuenta</button>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="container">
+                <div v-if="currentPage === 'intereses'">
+                    <h1>Tus Intereses</h1>
+                    <div class="container mt-4">
+                        <div class="row">
+                            <div class="col-md-6 col-lg-4" v-for="(noticia, index) in noticiasCoinciden" :key="index">
+                                <div class="card mb-3">
+                                    <div class="card-header font-weight-bold" @click="openNews(noticia.id)" style="cursor: pointer;">{{ noticia.titulo }}</div>
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ noticia.autor }}</h5>
+                                        <p class="card-text"><strong>URL:</strong> {{ noticia.url }}</p>
+                                        <div class="row mb-3">
+                                            <div class="col-6"><p class="card-text"><strong>Veracidad:</strong> {{ noticia.veracidad }}</p> </div>
+                                            <div class="col-6"><p class="card-text"><strong>Relevancia:</strong> {{ noticia.relevancia }}</p> </div>
+                                        </div>
+                                        <p class="card-text"><strong>Comunidad:</strong> {{ noticia.comunidad_nombre }}</p> <!-- Update to comunidad_id -->
+                                        <p class="card-text"><strong>Fecha de Publicación:</strong> {{ noticia.fecha_publicacion }}</p>
+                                        <!--<p class="card-text"><strong>Sinopsis:</strong> {{ noticia.sinopsis }}</p>-->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div v-else-if="currentPage === 'news-details'">
+                    <div class="container mt-4 col-12">
+                        <h1 class="mb-4">{{ selectedNews.titulo }}</h1>
+                        <div class="card">
+                            <div class="card-body">
+                                <p><strong>Autor:</strong> {{ selectedNews.autor }}</p>
+                                <p><strong>URL:</strong> <a :href="selectedNews.url" target="_blank">{{ selectedNews.url }}</a></p>
+                                <p><strong>Veracidad:</strong> {{ selectedNews.veracidad }}</p>
+                                <p><strong>Relevancia:</strong> {{ selectedNews.relevancia }}</p>
+                                <p><strong>Comunidad:</strong> {{ selectedNews.comunidad_nombre }}</p>
+                                <p><strong>Fecha de Publicación:</strong> {{ selectedNews.fecha_publicacion }}</p>
+                                <p><strong>Sinopsis:</strong> {{ selectedNews.sinopsis }}</p>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+                <div v-else-if="currentPage === 'news-admin'">
+                    <div class="container mt-4 col-12">
+                        <h1 class="mb-4">{{ selectedNews.titulo }}</h1>
+                        <div class="card">
+                            <div class="card-body">
+                                <p><strong>Autor:</strong> {{ selectedNews.autor }}</p>
+                                <p><strong>URL:</strong> <a :href="selectedNews.url" target="_blank">{{ selectedNews.url }}</a></p>
+                                <p><strong>Veracidad:</strong> {{ selectedNews.veracidad }}</p>
+                                <p><strong>Relevancia:</strong> {{ selectedNews.relevancia }}</p>
+                                <p><strong>Comunidad:</strong> {{ selectedNews.comunidad_nombre }}</p>
+                                <p><strong>Fecha de Publicación:</strong> {{ selectedNews.fecha_publicacion }}</p>
+                                <p><strong>Sinopsis:</strong> {{ selectedNews.sinopsis }}</p>
+                            </div>
+                        </div>
+                        <div v-if="sesion == 2" class="mt-3">
+                            <button class="btn btn-danger mr-2" @click="agregarNoticiaAEliminadas(selectedNews)">Eliminar</button>
+                            <button class="btn btn-warning mr-2" @click="modificarNoticia(selectedNews)">Modificar</button>
+                            <button class="btn btn-success" @click="aprobarNoticia(selectedNews)">Aprobar</button>
+                        </div>
+                    </div>
+                </div>
+                <div v-else-if="currentPage === 'modificar-noticia'">
+                    <h1>Modificar Noticia</h1>
+                    <form @submit.prevent="submitModificacion(selectedNews)">
+                        <div class="mb-3">
+                            <label for="titulo" class="form-label">Titulo:</label>
+                            <input type="text" class="form-control" id="titulo" v-model="selectedNews.titulo">
+                        </div>
+                        <div class="mb-3">
+                            <label for="autor" class="form-label">Autor:</label>
+                            <input type="text" class="form-control" id="autor" v-model="selectedNews.autor">
+                        </div>
+                        <div class="mb-3">
+                            <label for="url" class="form-label">URL:</label>
+                            <input type="text" class="form-control" id="url" v-model="selectedNews.url">
+                        </div>
+                        <div class="mb-3">
+                            <label for="comunidad" class="form-label">Comunidad:</label>
+                            <select class="form-control" id="idComunidad" v-model="selectedNews.comunidad_id">
+                                <option v-for="(comunidad, index) in comunidades" :key="index" :value="comunidad.id">{{ comunidad.nombre_comunidad }}</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="veracidad" class="form-label">Veracidad:</label>
+                            <select class="form-control" id="veracidad" v-model="selectedNews.veracidad">
+                                <option value="1">Baja</option>
+                                <option value="2">Media</option>
+                                <option value="3">Alta</option>
+                                <option value="4">Confirmada</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="relevancia" class="form-label">Relevancia:</label>
+                            <select class="form-control" id="relevancia" v-model="selectedNews.relevancia">
+                                <option value="1">Baja</option>
+                                <option value="2">Media</option>
+                                <option value="3">Alta</option>
+                                <option value="4">Imprescindible</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fecha_publicacion" class="form-label">Fecha de Publicación:</label>
+                            <input type="date" class="form-control" id="fecha_publicacion" v-model="selectedNews.fecha_publicacion">
+                        </div>
+                        <div class="mb-3">
+                            <label for="usuario" class="form-label">Usuario:</label>
+                            <textarea class="form-control" id="usuario" rows="3" v-model="selectedNews.usuario"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="sinopsis" class="form-label">Sinopsis:</label>
+                            <textarea class="form-control" id="sinopsis" rows="3" v-model="selectedNews.sinopsis"></textarea>
+                        </div>
+                        <button class="btn btn-primary" type="submit">Guardar Cambios</button>
+                    </form>
+                </div>
+                <div v-else-if="currentPage === 'crear'">
+                    <div class="container">
+                        <h1 class="mb-4">Añadir Contenido</h1>
+                        
+                        <!-- Nav tabs -->
+                        <ul class="nav nav-tabs" id="myTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link active" id="news-tab" data-toggle="tab" href="#news" role="tab" aria-controls="news" aria-selected="true">Añadir Noticia</a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link" id="community-tab" data-toggle="tab" href="#community" role="tab" aria-controls="community" aria-selected="false">Añadir Comunidad</a>
+                            </li>
+                        </ul>
+            
+                        <!-- Tab panes -->
+                        <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane fade show active" id="news" role="tabpanel" aria-labelledby="news-tab">
+                                <h2 class="mt-4">Añadir Noticia</h2>
+                                <form @submit.prevent="agregarNoticia">
+                                    <div class="mb-3">
+                                        <label for="titulo" class="form-label">Titulo:</label>
+                                        <input type="text" class="form-control" id="titulo" v-model="nuevaNoticia.titulo">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="autor" class="form-label">Autor:</label>
+                                        <input type="text" class="form-control" id="autor" v-model="nuevaNoticia.autor">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="url" class="form-label">URL:</label>
+                                        <input type="text" class="form-control" id="url" v-model="nuevaNoticia.url">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="comunidad" class="form-label">Comunidad:</label>
+                                        <select class="form-control" id="idComunidad" v-model="nuevaNoticia.comunidad_id">
+                                            <option v-for="(comunidad, index) in comunidades" :key="index" :value="comunidad.id">{{ comunidad.nombre_comunidad }}</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="veracidad" class="form-label">Veracidad:</label>
+                                        <select class="form-control" id="veracidad" v-model="nuevaNoticia.veracidad">
+                                            <option value="1">Baja</option>
+                                            <option value="2">Media</option>
+                                            <option value="3">Alta</option>
+                                            <option value="4">Confirmada</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="relevancia" class="form-label">Relevancia:</label>
+                                        <select class="form-control" id="relevancia" v-model="nuevaNoticia.relevancia">
+                                            <option value="1">Baja</option>
+                                            <option value="2">Media</option>
+                                            <option value="3">Alta</option>
+                                            <option value="4">Imprescindible</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="fecha_publicacion" class="form-label">Fecha de Publicación:</label>
+                                        <input type="date" class="form-control" id="fecha_publicacion" v-model="nuevaNoticia.fecha_publicacion">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="sinopsis" class="form-label">Sinopsis:</label>
+                                        <textarea class="form-control" id="sinopsis" rows="3" v-model="nuevaNoticia.sinopsis"></textarea>
+                                    </div>
+                                    <button class="btn btn-primary" type="submit">Añadir Noticia</button>
+                                </form>
+                            </div>
+                            <div class="tab-pane fade" id="community" role="tabpanel" aria-labelledby="community-tab">
+                                <h2 class="mt-4">Añadir Comunidad</h2>
+                                <form @submit.prevent="agregarComunidad">
+                                    <div class="mb-3">
+                                        <label for="nombre_comunidad" class="form-label">Nombre de la Comunidad:</label>
+                                        <input type="text" class="form-control" id="nombre_comunidad" v-model="nuevaComunidad.nombre_comunidad">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="razon" class="form-label">Razón:</label>
+                                        <textarea class="form-control" id="razon" rows="3" v-model="nuevaComunidad.razon"></textarea>
+                                    </div>
+                                    <button class="btn btn-primary" type="submit">Añadir Comunidad</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div v-else-if="currentPage === 'buscar'">
+                
+                    <h1>Buscar Comunidad</h1>
+                    <div class="row"> 
+                        <div class="col-6">
+                            <label for="idComunidad" class="form-label">Nombre de la Comunidad:</label>
+                            <select  class="form-control" id="idComunidad" v-model="comunidadB_ID">
+                                <option v-for="(comunidad, index) in comunidades" :key="index" :value="comunidad.id">{{ comunidad.nombre_comunidad }}</option>
+                               
+                            </select>
+                        </div>
+                        <div class="col-3">
+                            <label for="veracidad" class="form-label">Nivel de Veracidad:</label>
+                            <select  class="form-control" id="veracidad" v-model="veracidadB">
+                                <option value="1">Baja o más</option>
+                                <option value="2">Media o más</option>
+                                <option value="3">Alta o más</option>
+                                <option value="4">Confirmada</option>
+                            </select>
+                        </div>
+                        <div class="col-3">
+                            <label for="relevancia" class="form-label">Nivel de Relevancia:</label>
+                            <select  class="form-control" id="relevancia" v-model="relevanciaB">
+                                <option value="1">Baja o más</option>
+                                <option value="2">Media o más</option>
+                                <option value="3">Alta o más</option>
+                                <option value="4">Imprescindible</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary mt-2" @click="getNoticiasBusqueda">Buscar</button>
+                </div>
+                <div v-else-if="currentPage === 'encontrado'">
+                    <h1>{{ comunidadB_N }}</h1>
+                    <div class="row"> 
+                        <div class="col-6">
+                            <label for="idComunidad" class="form-label">Nombre de la Comunidad:</label>
+                            <select  class="form-control" id="idComunidad" v-model="idBuscado">
+                                <option v-for="(comunidad, index) in comunidades" :key="index" :value="comunidad.id">{{ comunidad.nombre_comunidad }}</option>
+                            </select>
+                        </div>
+                        <div class="col-3">
+                            <label for="veracidad" class="form-label">Nivel de Veracidad:</label>
+                            <select  class="form-control" v-model="veracidadB">
+                                <option value="1">Baja o más</option>
+                                <option value="2">Media o más</option>
+                                <option value="3">Alta o más</option>
+                                <option value="4">Confirmada</option>
+                            </select>
+                        </div>
+                        <div class="col-3">
+                            <label for="relevancia" class="form-label">Nivel de Relevancia:</label>
+                            <select  class="form-control" v-model="relevanciaB">
+                                <option value="1">Baja o más</option>
+                                <option value="2">Media o más</option>
+                                <option value="3">Alta o más</option>
+                                <option value="4">Imprescindible</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary mt-2" @click="getNoticiasBusqueda">Buscar</button>
+                    <div class="container mt-4">
+                        <div class="row">
+                            <div class="col-md-6 col-lg-4" v-for="(noticia, index) in noticiasCoinciden" :key="index">
+                                <div class="card mb-3">
+                                    <div class="card-header font-weight-bold" @click="openNews(noticia.id)" style="cursor: pointer;">{{ noticia.titulo }}</div>
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ noticia.autor }}</h5>
+                                        <p class="card-text"><strong>URL:</strong> {{ noticia.url }}</p>
+                                        <div class="row mb-3">
+                                            <div class="col-6"><p class="card-text"><strong>Veracidad:</strong> {{ noticia.veracidad }}</p> </div>
+                                            <div class="col-6"><p class="card-text"><strong>Relevancia:</strong> {{ noticia.relevancia }}</p> </div>
+                                        </div>
+                                        <p class="card-text"><strong>Comunidad:</strong> {{ noticia.comunidad_nombre }}</p> 
+                                        <p class="card-text"><strong>Fecha de Publicación:</strong> {{ noticia.fecha_publicacion }}</p>
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div v-else-if="currentPage === 'login'">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-6 offset-md-3 login-container">
+                                <h2 class="text-center mb-4">Inicia Sesion</h2>
+                                <form id="loginForm">
+                                    <div class="mb-3">
+                                        <label for="username" class="form-label">Usuario</label>
+                                        <input type="text" class="form-control" id="username" name="username" v-model="username" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="password" class="form-label">Contraseña</label>
+                                        <input type="password" class="form-control" id="password" name="password" v-model="password" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100" @click="login">Inicia Sesion</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div v-else-if="currentPage === 'registro'">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-6 offset-md-3 login-container">
+                                <h2 class="text-center mb-4">Registrate</h2>
+                                <form id="registroForm">
+                                    <div class="mb-3">
+                                        <label for="username" class="form-label">Usuario</label>
+                                        <input type="text" class="form-control" id="username" name="username" v-model="username" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="e-mail" class="form-label">E-mail</label>
+                                        <input type="text" class="form-control" id="e-mail" name="e-mail" v-model="email" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="password" class="form-label">Contraseña</label>
+                                        <input type="password" class="form-control" id="password" name="password" v-model="password" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100" @click="creaCuenta">Registrate</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div v-else-if="currentPage === 'cuenta'">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-6 offset-md-3">
+                                <h2 class="text-center mb-4">Tu Cuenta</h2>
+                                <p><strong>Usuario:</strong> {{ username }}</p>
+                                <p><strong>E-mail:</strong> {{ email }}</p>
+                                <button class="btn btn-primary w-100" @click="logout">Logout</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div v-else-if="currentPage === 'administracion'">
+                    <h1>Noticias No aprobadas</h1>
+                    <div class="container mt-4">
+                        <div class="row">
+                            <div class="col-md-6 col-lg-4" v-for="(noticia, index) in noticiasNoAProbadas" :key="index">
+                                <div class="card mb-3">
+                                    <div class="card-header font-weight-bold" @click="openNewsNoApr(noticia.id)" style="cursor: pointer;">{{ noticia.titulo }}</div>
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ noticia.autor }}</h5>
+                                        <p class="card-text"><strong>URL:</strong> {{ noticia.url }}</p>
+                                        <div class="row mb-3">
+                                            <div class="col-6"><p class="card-text"><strong>Veracidad:</strong> {{ noticia.veracidad }}</p> </div>
+                                            <div class="col-6"><p class="card-text"><strong>Relevancia:</strong> {{ noticia.relevancia }}</p> </div>
+                                        </div>
+                                        <p class="card-text"><strong>Comunidad:</strong> {{ noticia.comunidad_nombre }}</p> 
+                                        <p class="card-text"><strong>Fecha de Publicación:</strong> {{ noticia.fecha_publicacion }}</p>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+        <script type="text/javascript" src="js/script.js"></script>
+    </body>
+</html>
