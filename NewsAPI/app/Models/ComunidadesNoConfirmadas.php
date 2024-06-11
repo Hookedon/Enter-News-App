@@ -8,8 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class ComunidadesNoConfirmadas extends Model
 {
     use HasFactory;
-    protected $table = "comunidades_no_aceptadas";
+    protected $table = 'comunidades_no_aceptadas';
 
-    protected $fillable = ['nombre_comunidad', 'usuario'];
-
+    protected $fillable = [
+        'nombre_comunidad',
+        'usuario',
+        'razon',  
+    ];
 }

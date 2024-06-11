@@ -42,6 +42,7 @@ class ApiComunidadesController extends Controller
         // Create new community
         $comunidad = new Comunidades();
         $comunidad->nombre_comunidad = $request->input('nombre_comunidad');
+        //$comunidad->razon = $request->input('razon'); // Assuming you added a `razon` field to the Comunidades model and database
         $comunidad->save();
     
         return response()->json([
@@ -85,7 +86,22 @@ class ApiComunidadesController extends Controller
             ], 404);
         }
 
-        $comunidad->nombre_comunidad = $request->nombre_comunidad;
+        // Validate the input
+        $validator = Validator::make($request->all(), [
+            'nombre_comunidad' => 'required|string|max:255',
+        ]);
+
+        // Check if the validation fails
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $comunidad->nombre_comunidad = $request->input('nombre_comunidad');
+        //$comunidad->razon = $request->input('razon'); // Assuming you added a `razon` field to the Comunidades model and database
         $comunidad->save();
 
         return response()->json([

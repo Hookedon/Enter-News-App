@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\NoticiasNoConfirmadas;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class ApiNoticiasNoConfirmadasController extends Controller
 {
@@ -12,19 +13,11 @@ class ApiNoticiasNoConfirmadasController extends Controller
      */
     public function index()
     {
-        $comunidades=NoticiasNoConfirmadas::all();
+        $noticias = NoticiasNoConfirmadas::all();
         return response()->json([
             'status' => true,
-            'comunidades' => $comunidades
-        ]);//OJO//
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+            'noticias' => $noticias
+        ]);
     }
 
     /**
@@ -32,6 +25,28 @@ class ApiNoticiasNoConfirmadasController extends Controller
      */
     public function store(Request $request)
     {
+        // Validate the input
+        $validator = Validator::make($request->all(), [
+            'titulo' => 'required|string|max:255',
+            'autor' => 'required|string|max:255',
+            'url' => 'required|url|max:255',
+            'comunidad_id' => 'required|integer|exists:comunidades,id',
+            'veracidad' => 'required|integer|min:1|max:4',
+            'relevancia' => 'required|integer|min:1|max:4', 
+            'fecha_publicacion' => 'required|date',
+            'sinopsis' => 'nullable|string'
+        ]);
+
+        // Check if the validation fails
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Create new noticia
         $noticias = NoticiasNoConfirmadas::create($request->all());
 
         return response()->json([
@@ -46,19 +61,18 @@ class ApiNoticiasNoConfirmadasController extends Controller
      */
     public function show(string $id)
     {
-        $noticias=NoticiasNoConfirmadas::find($id);
+        $noticia = NoticiasNoConfirmadas::find($id);
+        if (!$noticia) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Noticia not found'
+            ], 404);
+        }
+
         return response()->json([
             'status' => true,
-            'noticias' => $noticias
+            'noticia' => $noticia
         ]);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
     }
 
     /**
@@ -66,7 +80,43 @@ class ApiNoticiasNoConfirmadasController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $noticia = NoticiasNoConfirmadas::find($id);
+        if (!$noticia) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Noticia not found'
+            ], 404);
+        }
+
+        // Validate the input
+        $validator = Validator::make($request->all(), [
+            'titulo' => 'required|string|max:255',
+            'autor' => 'required|string|max:255',
+            'url' => 'required|url|max:255',
+            'comunidad_id' => 'required|integer|exists:comunidades,id',
+            'veracidad' => 'required|integer|min:1|max:4',
+            'relevancia' => 'required|integer|min:1|max:4',
+            'fecha_publicacion' => 'required|date',
+            'sinopsis' => 'nullable|string'
+        ]);
+
+        // Check if the validation fails
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Update noticia
+        $noticia->update($request->all());
+
+        return response()->json([
+            'status' => true,
+            'message' => "Noticia updated successfully!",
+            'noticia' => $noticia
+        ], 200);
     }
 
     /**
@@ -74,13 +124,20 @@ class ApiNoticiasNoConfirmadasController extends Controller
      */
     public function destroy(string $id)
     {
-        $noticia= NoticiasNoConfirmadas::find($id);
+        $noticia = NoticiasNoConfirmadas::find($id);
+        if (!$noticia) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Noticia not found'
+            ], 404);
+        }
+
         $noticia->delete();
 
         return response()->json([
             'status' => true,
             'message' => "Noticia borrada correctamente!",
-            'product' => $noticia
+            'noticia' => $noticia
         ], 200);
     }
 }

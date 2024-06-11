@@ -15,6 +15,7 @@ new Vue({
         isNavOpen: false,
         nuevaComunidad: {
             nombre: "",
+            usuario:"",
             razon: ""
         },
         noticias: [],
@@ -32,9 +33,62 @@ new Vue({
         noticiasCoinciden:[],
         selectedNews: {},
         noticiasNoAProbadas:[],
+        comunidadesNoApro:[],
         
     },
     methods: {
+        aprobarComunidad(comunidad){
+            this.nuevaComunidad = {
+                nombre_comunidad: comunidad.nombre_comunidad,
+                usuario: comunidad.usuario,
+                razon: comunidad.razon
+
+            };
+            fetch('http://localhost:8000/api/comunidades', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer 1|L6gXGwCweLmBjjFj7ZgG5y5oPPsPX5ihBEqt5Wl24da8ff52'
+                },
+                body: JSON.stringify({"nombre_comunidad":this.nuevaComunidad.nombre_comunidad})
+            })
+            .then(response => response.json())
+            .then(responseData => {
+                if (responseData.status) {
+                    console.log('Comunidad aprobada y agregada correctamente!');
+                
+                    fetch(`http://localhost:8000/api/comunidadesNoConfirmadas/${comunidad.id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer 1|L6gXGwCweLmBjjFj7ZgG5y5oPPsPX5ihBEqt5Wl24da8ff52'
+                        }
+                    });
+                } else {
+                    console.error('Failed to approve the noticia.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+            this.nuevaComunidad = {
+                nombre_comunidad: "",
+                usuario:"",
+                razon: ""
+
+            };
+            this.getcomunidadesNoApr();
+        },
+        eliminarComunidad(comunidad){
+            fetch(`http://localhost:8000/api/comunidadesNoConfirmadas/${comunidad.id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer 1|L6gXGwCweLmBjjFj7ZgG5y5oPPsPX5ihBEqt5Wl24da8ff52'
+                }
+            });
+            this.getcomunidadesNoApr();
+        },
         agregarNoticiaAEliminadas(data) {
             console.log(JSON.stringify(data));
             fetch(`http://localhost:8000/api/noticiasNoConfirmadas/${data.id}/archive`, {
@@ -43,7 +97,7 @@ new Vue({
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer 1|L6gXGwCweLmBjjFj7ZgG5y5oPPsPX5ihBEqt5Wl24da8ff52'
                 },
-                
+
                 
             })
             .then(response => response.json())
@@ -140,6 +194,7 @@ new Vue({
                     break;
                 case "administracion":
                     this.getNoticiasNoApr();
+                    this.getcomunidadesNoApr();
                     break;
                 default:
                     break;
@@ -308,10 +363,10 @@ new Vue({
                 },
             })
             const data = await response.json();
-                console.log(data.noticias);
-                const comunidadNombre = await this.getComunidadPorID(data.noticias.comunidad_id);
-                data.noticias.comunidad_nombre = comunidadNombre;
-                this.selectedNews = data.noticias;
+                console.log(data);
+                const comunidadNombre = await this.getComunidadPorID(data.noticia.comunidad_id);
+                data.noticia.comunidad_nombre = comunidadNombre;
+                this.selectedNews = data.noticia;
                 this.currentPage = 'news-admin';
         },
         async getNoticiasIntereses() {
@@ -388,13 +443,35 @@ new Vue({
                     },
                 });
                 const data = await response.json();
-                for (let i = 0; i < data.comunidades.length; i++) {
-                    const comunidadNombre = await this.getComunidadPorID(data.comunidades[i].comunidad_id);
-                    data.comunidades[i].comunidad_nombre = comunidadNombre;
-                    noticias.push(data.comunidades[i]); 
+                for (let i = 0; i < data.noticias.length; i++) {
+                    const comunidadNombre = await this.getComunidadPorID(data.noticias[i].comunidad_id);
+                    data.noticias[i].comunidad_nombre = comunidadNombre;
+                    noticias.push(data.noticias[i]); 
                 }
                 console.log(data);
                 this.noticiasNoAProbadas= noticias;
+            } catch(error) {
+                console.error('Error fetching noticias:', error);
+            }
+        },
+        async getcomunidadesNoApr() {
+            this.comunidadesNoApro=[];
+            let comunidades=[];
+            try {
+                const response = await fetch(`http://localhost:8000/api/comunidadesNoConfirmadas`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer 1|L6gXGwCweLmBjjFj7ZgG5y5oPPsPX5ihBEqt5Wl24da8ff52',
+                    },
+                });
+                const data = await response.json();
+                for (let i = 0; i < data.comunidades.length; i++) {
+                    //const comunidadNombre = await this.getComunidadPorID(data.comunidades[i].comunidad_id);
+                    //data.comunidades[i].comunidad_nombre = comunidadNombre;
+                    comunidades.push(data.comunidades[i]); 
+                }
+                console.log(data);
+                this.comunidadesNoApro= comunidades;
             } catch(error) {
                 console.error('Error fetching noticias:', error);
             }
@@ -413,7 +490,7 @@ new Vue({
             .then(response => response.json())
             .then(data => {
                 if (data.status) {
-                    alert('Noticia añadida correctamente!');
+                    //alert('Noticia añadida correctamente!');
                     this.nuevaNoticia = {
                         titulo: "",
                         autor: "",
@@ -425,7 +502,7 @@ new Vue({
                         sinopsis: ""
                     };
                 } else {
-                    alert('Error al añadir noticia.');
+                    //alert('Error al añadir noticia.');
                 }
             })
             .catch(error => {
@@ -440,7 +517,7 @@ new Vue({
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer 1|L6gXGwCweLmBjjFj7ZgG5y5oPPsPX5ihBEqt5Wl24da8ff52'
                 },
-                body: JSON.stringify(this.nuevaComunidad)
+                body: JSON.stringify({"nombre_comunidad":this.nuevaComunidad.nombre_comunidad})
             })
             .then(response => response.json())
             .then(data => {
@@ -448,10 +525,12 @@ new Vue({
                     //alert('Comunidad añadida correctamente!');
                     this.nuevaComunidad = {
                         nombre_comunidad: "",
+                        usuario:"",
                         razon: ""
+
                     };
                 } else {
-                    alert('Error al añadir comunidad.');
+                    //alert('Error al añadir comunidad.');
                 }
             })
             .catch(error => {

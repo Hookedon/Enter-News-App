@@ -402,22 +402,63 @@
                     </div>
                 </div>
                 <div v-else-if="currentPage === 'administracion'">
-                    <h1>Noticias No aprobadas</h1>
-                    <div class="container mt-4">
-                        <div class="row">
-                            <div class="col-md-6 col-lg-4" v-for="(noticia, index) in noticiasNoAProbadas" :key="index">
-                                <div class="card mb-3">
-                                    <div class="card-header font-weight-bold" @click="openNewsNoApr(noticia.id)" style="cursor: pointer;">{{ noticia.titulo }}</div>
-                                    <div class="card-body">
-                                        <h5 class="card-title">{{ noticia.autor }}</h5>
-                                        <p class="card-text"><strong>URL:</strong> {{ noticia.url }}</p>
-                                        <div class="row mb-3">
-                                            <div class="col-6"><p class="card-text"><strong>Veracidad:</strong> {{ noticia.veracidad }}</p> </div>
-                                            <div class="col-6"><p class="card-text"><strong>Relevancia:</strong> {{ noticia.relevancia }}</p> </div>
-                                        </div>
-                                        <p class="card-text"><strong>Comunidad:</strong> {{ noticia.comunidad_nombre }}</p> 
-                                        <p class="card-text"><strong>Fecha de Publicación:</strong> {{ noticia.fecha_publicacion }}</p>
+                    <div class="container">
+                        <h1 class="mb-4">Administración</h1>
+                        
 
+                        <ul class="nav nav-tabs" id="adminTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link active" id="non-approved-news-tab" data-toggle="tab" href="#non-approved-news" role="tab" aria-controls="non-approved-news" aria-selected="true">Noticias No Aprobadas</a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link" id="non-approved-communities-tab" data-toggle="tab" href="#non-approved-communities" role="tab" aria-controls="non-approved-communities" aria-selected="false">Comunidades No Aprobadas</a>
+                            </li>
+                        </ul>
+                
+
+                        <div class="tab-content" id="adminTabContent">
+
+                            <div class="tab-pane fade show active" id="non-approved-news" role="tabpanel" aria-labelledby="non-approved-news-tab">
+                                <h2 class="mt-4">Noticias No aprobadas</h2>
+                                <div class="container mt-4">
+                                    <div class="row">
+                                        <div class="col-md-6 col-lg-4" v-for="(noticia, index) in noticiasNoAProbadas" :key="index">
+                                            <div class="card mb-3">
+                                                
+                                                <div class="card-header font-weight-bold" @click="openNewsNoApr(noticia.id)" style="cursor: pointer;">{{ noticia.titulo }}</div>
+                                                <div class="card-body">
+                                                    <h5 class="card-title">{{ noticia.autor }}</h5>
+                                                    <p class="card-text"><strong>URL:</strong> {{ noticia.url }}</p>
+                                                    <div class="row mb-3">
+                                                        <div class="col-6"><p class="card-text"><strong>Veracidad:</strong> {{ noticia.veracidad }}</p> </div>
+                                                        <div class="col-6"><p class="card-text"><strong>Relevancia:</strong> {{ noticia.relevancia }}</p> </div>
+                                                    </div>
+                                                    <p class="card-text"><strong>Comunidad:</strong> {{ noticia.comunidad_nombre }}</p> 
+                                                    <p class="card-text"><strong>Fecha de Publicación:</strong> {{ noticia.fecha_publicacion }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                
+
+                            <div class="tab-pane fade" id="non-approved-communities" role="tabpanel" aria-labelledby="non-approved-communities-tab">
+                                <h2 class="mt-4">Comunidades No Aprovadas</h2>
+                                <div class="container mt-4">
+                                    <div class="row">
+                                        <div class="col-md-6 col-lg-4" v-for="(comunidad, index) in comunidadesNoApro" :key="index">
+                                            <div class="card mb-3">
+                                                <div class="card-header font-weight-bold" @click="openNewsNoApr(noticia.id)">{{ comunidad.nombre_comunidad }}</div>
+                                                <div class="card-body">
+                                                    <p class="card-text">Usuario: {{ comunidad.usuario }}</p>
+                                                    <p class="card-text">Razon: </p>
+                                                    <p class="card-text">{{ comunidad.razon }}</p>
+                                                    <button class="btn btn-danger mr-2" @click="eliminarComunidad(comunidad)">Eliminar</button>
+                                                    <button class="btn btn-success" @click="aprobarComunidad(comunidad)">Aprobar</button>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

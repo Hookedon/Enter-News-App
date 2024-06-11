@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ComunidadesNoConfirmadas;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class ApiComunidadesNoConfirmadasController extends Controller
 {
@@ -12,19 +13,11 @@ class ApiComunidadesNoConfirmadasController extends Controller
      */
     public function index()
     {
-        $comunidades=ComunidadesNoConfirmadas::all();
+        $comunidades = ComunidadesNoConfirmadas::all();
         return response()->json([
             'status' => true,
             'comunidades' => $comunidades
-        ]);//OJO//
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        ]);
     }
 
     /**
@@ -32,7 +25,30 @@ class ApiComunidadesNoConfirmadasController extends Controller
      */
     public function store(Request $request)
     {
-       //
+        // Validate the input
+        $validator = Validator::make($request->all(), [
+            'nombre_comunidad' => 'required|string|max:255',
+            'usuario' => 'required|string|max:255',
+            'razon' => 'nullable|string',
+        ]);
+
+        // Check if the validation fails
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Create new comunidad no aceptada
+        $comunidad = ComunidadesNoConfirmadas::create($request->all());
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Comunidad no aceptada created successfully',
+            'comunidad' => $comunidad
+        ], 201);
     }
 
     /**
@@ -40,15 +56,19 @@ class ApiComunidadesNoConfirmadasController extends Controller
      */
     public function show(string $id)
     {
-       //
-    }
+        $comunidad = ComunidadesNoConfirmadas::find($id);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
+        if (!$comunidad) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Comunidad no aceptada not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'comunidad' => $comunidad
+        ]);
     }
 
     /**
@@ -56,7 +76,39 @@ class ApiComunidadesNoConfirmadasController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $comunidad = ComunidadesNoConfirmadas::find($id);
+
+        if (!$comunidad) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Comunidad no aceptada not found'
+            ], 404);
+        }
+
+        // Validate the input
+        $validator = Validator::make($request->all(), [
+            'nombre_comunidad' => 'required|string|max:255',
+            'usuario' => 'required|string|max:255',
+            'razon' => 'nullable|string',
+        ]);
+
+        // Check if the validation fails
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Update the comunidad
+        $comunidad->update($request->all());
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Comunidad no aceptada updated successfully',
+            'comunidad' => $comunidad
+        ]);
     }
 
     /**
@@ -64,6 +116,20 @@ class ApiComunidadesNoConfirmadasController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $comunidad = ComunidadesNoConfirmadas::find($id);
+
+        if (!$comunidad) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Comunidad no aceptada not found'
+            ], 404);
+        }
+
+        $comunidad->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Comunidad no aceptada deleted successfully'
+        ]);
     }
 }
